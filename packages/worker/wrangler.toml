@@ -1,0 +1,27 @@
+name = "crm-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# D1 database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "crm-db"
+database_id = ""
+
+# R2 bucket for customer documents
+[[r2_buckets]]
+binding = "DOCUMENTS"
+bucket_name = "crm-documents"
+
+# KV for session blacklist / rate limiting
+[[kv_namespaces]]
+binding = "KV"
+id = ""
+
+# Environment variables (set via `wrangler secret put JWT_SECRET`)
+[vars]
+JWT_SECRET = ""
+
+# Dev server
+[dev]
+port = 8787

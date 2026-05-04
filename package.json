@@ -1,0 +1,16 @@
+{
+  "name": "crm-cloudflare",
+  "private": true,
+  "workspaces": [
+    "packages/worker",
+    "packages/frontend"
+  ],
+  "scripts": {
+    "dev:worker": "npm -w packages/worker run dev",
+    "dev:frontend": "npm -w packages/frontend run dev",
+    "build:frontend": "npm -w packages/frontend run build",
+    "deploy:worker": "npm -w packages/worker run deploy",
+    "db:migrate": "npm -w packages/worker run db:migrate",
+    "db:migrate:local": "npm -w packages/worker run db:migrate:local"
+  }
+}
