@@ -4,7 +4,10 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
+import CustomerDetail from './pages/CustomerDetail';
+import CustomerNew from './pages/CustomerNew';
 import Deals from './pages/Deals';
+import DealDetail from './pages/DealDetail';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -39,7 +42,10 @@ export default function App() {
           >
             <Route index element={<Dashboard />} />
             <Route path="customers" element={<Customers />} />
+            <Route path="customers/new" element={<CustomerNew />} />
+            <Route path="customers/:id" element={<CustomerDetail />} />
             <Route path="deals" element={<Deals />} />
+            <Route path="deals/:id" element={<DealDetail />} />
           </Route>
         </Routes>
       </BrowserRouter>

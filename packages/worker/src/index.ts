@@ -228,6 +228,16 @@ api.get('/deals', async (c) => {
   return c.json(response);
 });
 
+// GET /api/deals/:id
+api.get('/deals/:id', async (c) => {
+  const deal = await c.env.DB
+    .prepare('SELECT * FROM deals WHERE id = ?')
+    .bind(c.req.param('id'))
+    .first<Deal>();
+  if (!deal) return c.json({ error: 'Not found' }, 404);
+  return c.json(deal);
+});
+
 api.post('/deals', async (c) => {
   const body = await c.req.json<DealInsert>();
   const user = getAuthUser(c);

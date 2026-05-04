@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 
 interface Customer {
@@ -32,6 +32,7 @@ const statusColor: Record<string, string> = {
 };
 
 export default function Customers() {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<Paginated<Customer> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,7 +49,9 @@ export default function Customers() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>客户管理</h1>
-        <button style={{
+        <button
+          onClick={() => navigate('/customers/new')}
+          style={{
           padding: '0.5rem 1rem',
           background: '#2563eb',
           color: '#fff',
