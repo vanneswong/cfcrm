@@ -1,25 +1,11 @@
 // Database type definitions — mirrors migrations/0001_init.sql
 // Cloudflare D1 (SQLite-compatible)
 
-export type UserRole = 'admin' | 'manager' | 'user';
 export type CustomerStatus = 'active' | 'inactive' | 'lead';
 export type DealStage =
   | 'qualification' | 'needs_analysis' | 'proposal'
   | 'negotiation' | 'closed_won' | 'closed_lost';
 export type InteractionType = 'call' | 'meeting' | 'email' | 'note' | 'task';
-
-export interface User {
-  id: string;
-  email: string;
-  password_hash: string;
-  name: string;
-  role: UserRole;
-  avatar_url: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export type UserPublic = Omit<User, 'password_hash'>;
 
 export interface Customer {
   id: string;

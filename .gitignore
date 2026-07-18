@@ -1,5 +1,61 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+.wrangler/
+
+# Environment variables
 .env
+.env.local
+.env.production
+
+# Logs
 *.log
+npm-debug.log*
+
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Build artifacts
+*.tgz
+*.tar.gz
+
+# Local development
+.wrangler/
+wrangler.toml.local
+
+# SQL临时文件
+*_tmp*.sql
+*check*.sql
+*seed*.sql
+*query*.sql
+
+# 测试临时文件
+tmp_body.json

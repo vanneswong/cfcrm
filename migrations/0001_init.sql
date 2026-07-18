@@ -3,18 +3,6 @@
 
 PRAGMA foreign_keys = ON;
 
--- Users & Authentication
-CREATE TABLE IF NOT EXISTS users (
-    id          TEXT PRIMARY KEY,
-    email       TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    name        TEXT NOT NULL,
-    role        TEXT NOT NULL CHECK(role IN ('admin', 'manager', 'user')) DEFAULT 'user',
-    avatar_url  TEXT,
-    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
 -- Customers
 CREATE TABLE IF NOT EXISTS customers (
     id          TEXT PRIMARY KEY,
@@ -28,15 +16,14 @@ CREATE TABLE IF NOT EXISTS customers (
     address     TEXT,
     website     TEXT,
     notes       TEXT,
-    assigned_to TEXT REFERENCES users(id) ON DELETE SET NULL,
-    created_by  TEXT REFERENCES users(id) ON DELETE SET NULL,
+    assigned_to TEXT,
+    created_by  TEXT,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX idx_customers_status ON customers(status);
-CREATE INDEX idx_customers_assigned ON customers(assigned_to);
-CREATE INDEX idx_customers_created_at ON customers(created_at);
+CREATE INDEX IF NOT EXISTS idx_customers_status ON customers(status);
+CREATE INDEX IF NOT EXISTS idx_customers_created_at ON customers(created_at);
 
 -- Contacts (multiple per customer)
 CREATE TABLE IF NOT EXISTS contacts (
@@ -53,7 +40,7 @@ CREATE TABLE IF NOT EXISTS contacts (
     updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX idx_contacts_customer ON contacts(customer_id);
+CREATE INDEX IF NOT EXISTS idx_contacts_customer ON contacts(customer_id);
 
 -- Deals / Sales Pipeline
 CREATE TABLE IF NOT EXISTS deals (
@@ -68,16 +55,15 @@ CREATE TABLE IF NOT EXISTS deals (
     probability       INTEGER NOT NULL DEFAULT 20,
     expected_close_date TEXT,
     contact_id        TEXT REFERENCES contacts(id) ON DELETE SET NULL,
-    assigned_to       TEXT REFERENCES users(id) ON DELETE SET NULL,
+    assigned_to       TEXT,
     notes             TEXT,
-    created_by        TEXT REFERENCES users(id) ON DELETE SET NULL,
+    created_by        TEXT,
     created_at        TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at        TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX idx_deals_customer ON deals(customer_id);
-CREATE INDEX idx_deals_stage ON deals(stage);
-CREATE INDEX idx_deals_assigned ON deals(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_deals_customer ON deals(customer_id);
+CREATE INDEX IF NOT EXISTS idx_deals_stage ON deals(stage);
 
 -- Interactions (calls, meetings, emails, notes)
 CREATE TABLE IF NOT EXISTS interactions (
@@ -89,13 +75,13 @@ CREATE TABLE IF NOT EXISTS interactions (
     body        TEXT,
     contact_id  TEXT REFERENCES contacts(id) ON DELETE SET NULL,
     occurred_at TEXT,
-    created_by  TEXT REFERENCES users(id) ON DELETE SET NULL,
+    created_by  TEXT,
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX idx_interactions_customer ON interactions(customer_id);
-CREATE INDEX idx_interactions_deal ON interactions(deal_id);
-CREATE INDEX idx_interactions_created ON interactions(created_at);
+CREATE INDEX IF NOT EXISTS idx_interactions_customer ON interactions(customer_id);
+CREATE INDEX IF NOT EXISTS idx_interactions_deal ON interactions(deal_id);
+CREATE INDEX IF NOT EXISTS idx_interactions_created ON interactions(created_at);
 
 -- Tags
 CREATE TABLE IF NOT EXISTS tags (
@@ -120,13 +106,9 @@ CREATE TABLE IF NOT EXISTS documents (
     r2_key      TEXT NOT NULL,
     size        INTEGER,
     mime_type   TEXT,
-    uploaded_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+    uploaded_by TEXT,
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX idx_documents_customer ON documents(customer_id);
-CREATE INDEX idx_documents_deal ON documents(deal_id);
-
--- Seed data: default admin user (password: admin123)
--- INSERT INTO users (id, email, password_hash, name, role) 
--- VALUES ('u-admin-001', 'admin@crm.local', '$2a$...', 'Admin', 'admin');
+CREATE INDEX IF NOT EXISTS idx_documents_customer ON documents(customer_id);
+CREATE INDEX IF NOT EXISTS idx_documents_deal ON documents(deal_id);

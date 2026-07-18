@@ -16,9 +16,13 @@ import type {
 
 type Bindings = {
   DB: D1Database;
-  DOCUMENTS: R2Bucket;
-  KV: KVNamespace;
+  DOCUMENTS?: R2Bucket;
+  KV?: KVNamespace;
   JWT_SECRET: string;
+  ADMIN_EMAIL: string;
+  ADMIN_PASSWORD: string;
+  ADMIN_NAME: string;
+  ASSETS?: Fetcher;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -26,7 +30,19 @@ const app = new Hono<{ Bindings: Bindings }>();
 // ── Global middleware ──────────────────────────────────
 
 app.use('*', cors({
-  origin: ['http://localhost:3000'],
+  origin: (origin) => {
+    const allowed = [
+      'http://localhost:3000',
+      'http://localhost:8787',
+      'https://crm.vannes.top',
+      'https://1.vannes.top',
+    ];
+    if (!origin || allowed.includes(origin)) return origin;
+    // Allow any crm-b2j.pages.dev subdomain (preview deployments)
+    if (origin.endsWith('.crm-b2j.pages.dev')) return origin;
+    if (origin === 'https://crm-b2j.pages.dev') return origin;
+    return null;
+  },
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -43,30 +59,35 @@ app.onError((err, c) => {
 
 // POST /api/auth/login
 app.post('/api/auth/login', async (c) => {
-  const { email, password } = await c.req.json<{ email: string; password: string }>();
-  if (!email || !password) {
-    return c.json({ error: 'Email and password required' }, 400);
+  try {
+    const { email, password } = await c.req.json<{ email: string; password: string }>();
+    if (!email || !password) {
+      return c.json({ error: 'Email and password required' }, 400);
+    }
+
+    // 从环境变量获取管理员信息
+    const adminEmail = c.env.ADMIN_EMAIL;
+    const adminPassword = c.env.ADMIN_PASSWORD;
+    const adminName = c.env.ADMIN_NAME || '管理员';
+
+    if (email !== adminEmail || password !== adminPassword) {
+      return c.json({ error: 'Invalid email or password' }, 401);
+    }
+
+    const token = await sign(
+      { sub: 'admin-001', email: adminEmail, role: 'admin', name: adminName },
+      c.env.JWT_SECRET,
+      'HS256',
+    );
+
+    return c.json({
+      token,
+      user: { id: 'admin-001', email: adminEmail, name: adminName, role: 'admin' },
+    });
+  } catch (err: any) {
+    console.error('Login error:', err);
+    return c.json({ error: 'Login failed', detail: err?.message || String(err) }, 500);
   }
-
-  const user = await c.env.DB
-    .prepare('SELECT id, email, password_hash, name, role FROM users WHERE email = ?')
-    .bind(email)
-    .first<{ id: string; email: string; password_hash: string; name: string; role: string }>();
-
-  if (!user || user.password_hash !== password) {
-    return c.json({ error: 'Invalid email or password' }, 401);
-  }
-
-  const token = await sign(
-    { sub: user.id, email: user.email, role: user.role, name: user.name },
-    c.env.JWT_SECRET,
-    'HS256',
-  );
-
-  return c.json({
-    token,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role },
-  });
 });
 
 // ── Protected routes ──────────────────────────────────
@@ -300,5 +321,33 @@ app.route('/api', api);
 // ── Health check ───────────────────────────────────────
 
 app.get('/health', (c) => c.json({ status: 'ok', ts: new Date().toISOString() }));
+
+// ── Static file serving (frontend) ─────────────────────
+
+// 处理静态资源请求
+app.get('*', async (c) => {
+  // 如果有ASSETS绑定，使用它来提供静态文件
+  if (c.env.ASSETS) {
+    const url = new URL(c.req.url);
+    let path = url.pathname;
+    
+    // 如果是根路径或没有扩展名，返回index.html (SPA路由)
+    if (path === '/' || !path.includes('.')) {
+      path = '/index.html';
+    }
+    
+    try {
+      const response = await c.env.ASSETS.fetch(new Request(new URL(path, url.origin).toString(), c.req.raw));
+      if (response.status === 200) {
+        return response;
+      }
+    } catch (e) {
+      console.error('Asset fetch error:', e);
+    }
+  }
+  
+  // 如果没有ASSETS或找不到文件，返回index.html (SPA fallback)
+  return c.html('<!DOCTYPE html><html><head><title>CRM</title></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>');
+});
 
 export default app;

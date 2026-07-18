@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 
 interface Customer {
@@ -61,6 +61,7 @@ const stageLabel: Record<string, string> = {
 
 export default function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
@@ -123,7 +124,10 @@ export default function CustomerDetail() {
           </Section>
 
           {/* Contacts */}
-          <Section title={`联系人 (${contacts.length})`}>
+          <Section
+            title={`联系人 (${contacts.length})`}
+            action={<ActionBtn label="+ 联系人" onClick={() => navigate(`/customers/${id}/contacts/new`)} />}
+          >
             {contacts.length === 0 ? (
               <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>暂无联系人</p>
             ) : (
@@ -149,7 +153,10 @@ export default function CustomerDetail() {
         {/* Right column: deals + interactions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {/* Deals */}
-          <Section title={`交易 (${deals.length})`}>
+          <Section
+            title={`交易 (${deals.length})`}
+            action={<ActionBtn label="+ 交易" onClick={() => navigate(`/deals/new?customerId=${id}`)} />}
+          >
             {deals.length === 0 ? (
               <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>暂无交易</p>
             ) : (
@@ -174,7 +181,10 @@ export default function CustomerDetail() {
           </Section>
 
           {/* Interactions */}
-          <Section title={`沟通记录 (${interactions.length})`}>
+          <Section
+            title={`沟通记录 (${interactions.length})`}
+            action={<ActionBtn label="+ 沟通记录" onClick={() => navigate(`/interactions/new?customerId=${id}`)} />}
+          >
             {interactions.length === 0 ? (
               <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>暂无记录</p>
             ) : (
@@ -201,14 +211,38 @@ export default function CustomerDetail() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section style={{ background: '#fff', borderRadius: 10, padding: '1.25rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-      <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', marginBottom: '1rem', textTransform: 'uppercase' }}>
-        {title}
-      </h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', textTransform: 'uppercase', margin: 0 }}>
+          {title}
+        </h3>
+        {action}
+      </div>
       {children}
     </section>
+  );
+}
+
+function ActionBtn({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: '0.3rem 0.75rem',
+        background: '#2563eb',
+        color: '#fff',
+        border: 'none',
+        borderRadius: 6,
+        fontSize: '0.8rem',
+        fontWeight: 600,
+        cursor: 'pointer',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}
+    </button>
   );
 }
 

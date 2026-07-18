@@ -8,6 +8,9 @@ import CustomerDetail from './pages/CustomerDetail';
 import CustomerNew from './pages/CustomerNew';
 import Deals from './pages/Deals';
 import DealDetail from './pages/DealDetail';
+import ContactNew from './pages/ContactNew';
+import DealNew from './pages/DealNew';
+import InteractionNew from './pages/InteractionNew';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -45,7 +48,10 @@ export default function App() {
             <Route path="customers/new" element={<CustomerNew />} />
             <Route path="customers/:id" element={<CustomerDetail />} />
             <Route path="deals" element={<Deals />} />
+            <Route path="deals/new" element={<DealNew />} />
             <Route path="deals/:id" element={<DealDetail />} />
+            <Route path="customers/:customerId/contacts/new" element={<ContactNew />} />
+            <Route path="interactions/new" element={<InteractionNew />} />
           </Route>
         </Routes>
       </BrowserRouter>

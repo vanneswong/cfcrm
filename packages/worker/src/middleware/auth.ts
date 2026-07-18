@@ -1,14 +1,13 @@
 import { Context, Next } from 'hono';
 import { verify } from 'hono/jwt';
 import type { JWTPayload } from 'hono/utils/jwt/types';
-import type { UserRole } from '../db/schema';
 
 // ── Types ──────────────────────────────────────────────
 
 export interface AuthUser {
   sub: string;
   email: string;
-  role: UserRole;
+  role: 'admin' | 'manager' | 'user';
   name: string;
 }
 
@@ -48,7 +47,7 @@ export function authRequired() {
 /**
  * Restrict route to specific roles. Must be placed AFTER authRequired().
  */
-export function requireRole(...roles: UserRole[]) {
+export function requireRole(...roles: ('admin' | 'manager' | 'user')[]) {
   return async (c: Context, next: Next) => {
     const payload = c.get('jwtPayload');
     if (!payload) {

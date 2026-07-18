@@ -1,4 +1,5 @@
 // API client — fetch wrapper with JWT auth
+// 前后端一体部署，使用相对路径
 
 const API_BASE = '/api';
 

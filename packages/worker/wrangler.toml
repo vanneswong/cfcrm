@@ -6,22 +6,30 @@ compatibility_date = "2025-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "crm-db"
-database_id = ""
+database_id = "0345611a-b37e-454a-acfa-49976a0b1d77"
 
-# R2 bucket for customer documents
-[[r2_buckets]]
-binding = "DOCUMENTS"
-bucket_name = "crm-documents"
+# R2 bucket for customer documents (local dev: comment out)
+# [[r2_buckets]]
+# binding = "DOCUMENTS"
+# bucket_name = "crm-documents"
 
-# KV for session blacklist / rate limiting
-[[kv_namespaces]]
-binding = "KV"
-id = ""
+# KV for session blacklist / rate limiting (local dev: use dummy id)
+# [[kv_namespaces]]
+# binding = "KV"
+# id = "kv-local-dev"
 
-# Environment variables (set via `wrangler secret put JWT_SECRET`)
+# Environment variables
 [vars]
-JWT_SECRET = ""
+JWT_SECRET = "dev-secret-change-in-production-2025"
+ADMIN_EMAIL = "admin@crm.local"
+ADMIN_PASSWORD = "admin123"
+ADMIN_NAME = "管理员"
 
 # Dev server
 [dev]
 port = 8787
+
+# Static assets配置 (用于嵌入前端)
+[assets]
+directory = "../frontend/dist"
+binding = "ASSETS"
